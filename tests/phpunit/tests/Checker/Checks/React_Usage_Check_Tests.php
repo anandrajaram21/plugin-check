@@ -107,6 +107,15 @@ class React_Usage_Check_Tests extends WP_UnitTestCase {
 		$this->assertSame( 0, $check_result->get_warning_count() );
 	}
 
+	public function test_run_does_not_flag_react_19_dom_renderer() {
+		// React 19's renderer holds the legacy react.element symbol and a
+		// __reactFiber$ key alongside react.transitional.element.
+		$check_result = $this->run_check( 'test-plugin-react-usage-without-errors' );
+
+		$this->assertArrayNotHasKey( 'react-dom-19.js', $check_result->get_errors() );
+		$this->assertArrayNotHasKey( 'react-dom-19.js', $check_result->get_warnings() );
+	}
+
 	/**
 	 * Runs the check against one of the test plugins.
 	 *

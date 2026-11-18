@@ -241,12 +241,23 @@ class React_Usage_Check extends Abstract_File_Check {
 	 * A template literal counts as well as a quoted string, because some
 	 * minifiers rewrite every string in a bundle as one.
 	 *
+	 * A React 19 build is never reported, even though the symbol name is still in
+	 * it: React 19 keeps declaring `react.element` so that it can recognize
+	 * elements created by older builds, and its DOM renderer does exactly that.
+	 * Such a build declares `react.transitional.element` next to it, and the
+	 * renderer or `react` package also carries a client internals key that only
+	 * React 19 defines. Either one marks the file as React 19.
+	 *
 	 * @since 2.2.0
 	 *
 	 * @param string $contents Contents of the JavaScript file.
 	 * @return array|false Array with `line` and `column` keys, or false if no match was found.
 	 */
 	private function find_inlined_pre_19_react( $contents ) {
+		if ( preg_match( '/([\'"`])react\.transitional\.element\1|__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE/', $contents ) ) {
+			return false;
+		}
+
 		return $this->find_first_match( '/([\'"`])react\.element\1/', $contents );
 	}
 
